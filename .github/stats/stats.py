@@ -1,24 +1,15 @@
-"""Gera assets/stats.svg (estatisticas do perfil na estetica RATM XX).
+"""Gera assets/stats.svg (card de estatísticas do perfil, rodado diariamente pela Action).
 Uso: GITHUB_TOKEN=... python .github/stats/stats.py"""
 import json
 import os
 import urllib.request
 from collections import Counter
 
-from fontTools.pens.svgPathPen import SVGPathPen
-from fontTools.pens.transformPen import TransformPen
-from fontTools.ttLib import TTFont
+from ratm import BLACK, CREAM, GREY, INK, RED, RED_DARK, _num, section_head, star, svg, text, write
 
 LOGIN = "Giandonn"
-HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "..", "..", "assets", "stats.svg")
 
-FONTS = {
-    "anton": TTFont(os.path.join(HERE, "fonts", "Anton.ttf")),
-    "type": TTFont(os.path.join(HERE, "fonts", "CourierPrime.ttf")),
-}
-
-# Estilo/markup e notebooks (saidas salvas inflam o tamanho) distorcem o ranking.
+# Estilo/markup e notebooks (saídas salvas inflam o tamanho) distorcem o ranking.
 IGNORED_LANGS = {"CSS", "SCSS", "Less", "HTML", "Jupyter Notebook"}
 
 QUERY = """
@@ -58,34 +49,12 @@ def fetch():
     return body["data"]["user"]
 
 
-def text_path(font, text, size, x, y, tracking=0.0, anchor="start"):
-    f = FONTS[font]
-    gs, cmap, hmtx = f.getGlyphSet(), f.getBestCmap(), f["hmtx"]
-    scale = size / f["head"].unitsPerEm
-    width, glyphs = 0.0, []
-    for ch in text:
-        name = cmap.get(ord(ch))
-        if name is None:
-            continue
-        glyphs.append((name, width))
-        width += hmtx[name][0] * scale + tracking
-    width -= tracking
-    if anchor == "middle":
-        x -= width / 2
-    elif anchor == "end":
-        x -= width
-    pen = SVGPathPen(gs, ntos=lambda v: ("%.1f" % v).rstrip("0").rstrip("."))
-    for name, off in glyphs:
-        gs[name].draw(TransformPen(pen, (scale, 0, 0, -scale, x + off, y)))
-    return pen.getCommands()
-
-
 def fmt(n):
     return f"{n:,}".replace(",", ".")
 
 
 def render(u):
-    W, H = 1280, 600
+    W, H = 1280, 706
     cc = u["contributionsCollection"]
     repos = u["repositories"]
     langs = Counter()
@@ -94,7 +63,6 @@ def render(u):
             if e["node"]["name"] not in IGNORED_LANGS:
                 langs[e["node"]["name"]] += e["size"]
     total_size = sum(langs.values()) or 1
-    top = langs.most_common(6)
 
     numbers = [
         (fmt(cc["totalCommitContributions"] + cc["restrictedContributionsCount"]), "COMMITS / 12 MESES"),
@@ -103,63 +71,59 @@ def render(u):
         (fmt(sum(r["stargazerCount"] for r in repos["nodes"])), "ESTRELAS"),
     ]
 
-    parts = []
+    parts = [section_head("03", "REGISTROS")]
     add = parts.append
-    add(f'<path d="{text_path("type", "BOLETIM DE OCORRÊNCIAS", 18, 40, 52, tracking=2)}" fill="#8c8c8c"/>')
-    add('<rect x="40" y="66" width="560" height="3" fill="#e8e8e8"/>')
+
+    # Placar: 4 blocos, o primeiro em vermelho.
+    bw, bh, top = 136, 124, 144
     for i, (val, label) in enumerate(numbers):
-        x, y = 40 + (i % 2) * 290, 170 + (i // 2) * 130
-        add(f'<path d="{text_path("anton", val, 78, x, y)}" fill="#f2f2f2" filter="url(#distress)"/>')
-        add(f'<path d="{text_path("type", label, 15, x + 2, y + 30, tracking=1.5)}" fill="#7a7a7a"/>')
+        x = 40 + (i % 2) * (bw * 2 + 20)
+        y = top + (i // 2) * (bh + 16)
+        hot = i == 0
+        add(f'<rect x="{x}" y="{y}" width="{bw * 2 + 4}" height="{bh}" fill="{RED if hot else INK}"/>')
+        if not hot:
+            add(f'<rect x="{x}" y="{y}" width="6" height="{bh}" fill="{RED}"/>')
+        vd, _ = text("anton", val, 70, x + 22, y + 82)
+        ld, _ = text("type", label, 14, x + 24, y + 108, tracking=1.5)
+        add(f'<path d="{vd}" fill="{BLACK if hot else CREAM}" filter="url(#distress)"/>')
+        add(f'<path d="{ld}" fill="{BLACK if hot else GREY}"/>')
+    add(f'<path d="{star(40 + bw * 2 - 22, top + 30, 16)}" fill="{BLACK}"/>')
 
-    lx = 680
-    add(f'<path d="{text_path("type", "LINGUAGENS EM USO", 18, lx, 52, tracking=2)}" fill="#8c8c8c"/>')
-    add(f'<rect x="{lx}" y="66" width="560" height="3" fill="#e8e8e8"/>')
-    shades = ["#f2f2f2", "#cfcfcf", "#adadad", "#8c8c8c", "#6e6e6e", "#555555"]
-    for i, (name, size) in enumerate(top):
-        y = 112 + i * 52
+    # Linguagens.
+    lx, lw = 640, 600
+    hd, _ = text("type", "LINGUAGENS EM USO", 16, lx, top + 12, tracking=2)
+    add(f'<path d="{hd}" fill="{GREY}"/>')
+    for i, (name, size) in enumerate(langs.most_common(6)):
+        y = top + 50 + i * 44
         pct = size / total_size
-        add(f'<path d="{text_path("anton", name.upper(), 24, lx, y, tracking=2)}" fill="#e0e0e0"/>')
-        add(f'<path d="{text_path("type", f"{pct * 100:.1f}%", 16, lx + 560, y, anchor="end")}" fill="#8c8c8c"/>')
-        add(f'<rect x="{lx}" y="{y + 10}" width="560" height="10" fill="#1c1c1c"/>')
-        add(f'<rect x="{lx}" y="{y + 10}" width="{max(560 * pct, 4):.1f}" height="10" fill="{shades[i]}"/>')
+        nd, _ = text("anton", name.upper(), 22, lx, y, tracking=2)
+        pd, _ = text("anton", f"{pct * 100:.1f}%", 22, lx + lw, y, anchor="end")
+        add(f'<path d="{nd}" fill="{CREAM}"/>')
+        add(f'<path d="{pd}" fill="{RED if i == 0 else GREY}"/>')
+        add(f'<rect x="{lx}" y="{y + 7}" width="{lw}" height="9" fill="{INK}"/>')
+        add(f'<rect x="{lx}" y="{y + 7}" width="{_num(max(lw * pct, 4))}" height="9" fill="{RED if i == 0 else "#9b1420" if i < 3 else RED_DARK}"/>')
 
+    # Calendário de contribuições.
     cal = cc["contributionCalendar"]
     weeks = cal["weeks"][-53:]
-    gy = 430
-    title = f"FREQUÊNCIA DE ATAQUE  //  {fmt(cal['totalContributions'])} CONTRIBUIÇÕES NO ANO"
-    add(f'<path d="{text_path("type", title, 16, 40, gy - 14, tracking=1.5)}" fill="#8c8c8c"/>')
+    gy = 500
+    add(f'<rect x="40" y="{gy - 42}" width="1200" height="2" fill="{RED_DARK}"/>')
+    td, _ = text("anton", "FREQUÊNCIA DE ATAQUE", 26, 40, gy - 8, tracking=3)
+    cd, _ = text("type", f"{fmt(cal['totalContributions'])} CONTRIBUIÇÕES NOS ÚLTIMOS 12 MESES", 14, 1240, gy - 10, tracking=1.5, anchor="end")
+    add(f'<path d="{td}" fill="{CREAM}"/>')
+    add(f'<path d="{cd}" fill="{GREY}"/>')
     peak = max((d["contributionCount"] for w in weeks for d in w["contributionDays"]), default=0) or 1
-    ramp = ["#161616", "#3a3a3a", "#6e6e6e", "#adadad", "#f2f2f2"]
-    cell, gap = 19, 3.2
+    ramp = [INK, "#4a0a10", "#7d0d18", RED, "#ff4a4a"]
+    cell, gap = 18.8, 3.8
+    ox = 40 + (1200 - (len(weeks) * (cell + gap) - gap)) / 2
     for wi, w in enumerate(weeks):
         for di, d in enumerate(w["contributionDays"]):
             c = d["contributionCount"]
             lvl = 0 if c == 0 else min(4, 1 + int(3 * c / peak))
-            add(f'<rect x="{40 + wi * (cell + gap):.1f}" y="{gy + di * (cell + gap):.1f}" width="{cell}" height="{cell}" fill="{ramp[lvl]}"/>')
+            add(f'<rect x="{_num(ox + wi * (cell + gap))}" y="{_num(gy + 14 + di * (cell + gap))}" width="{cell}" height="{cell}" fill="{ramp[lvl]}"/>')
 
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">
-<defs>
-  <filter id="grain" x="0" y="0" width="100%" height="100%">
-    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="23"/>
-    <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.09 0"/>
-    <feComposite in2="SourceGraphic" operator="in"/>
-  </filter>
-  <filter id="distress" x="-5%" y="-5%" width="110%" height="110%">
-    <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="4" seed="7" result="t"/>
-    <feColorMatrix in="t" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -14 10.7" result="speck"/>
-    <feComposite in="SourceGraphic" in2="speck" operator="in"/>
-  </filter>
-</defs>
-<rect width="{W}" height="{H}" fill="#0a0a0a"/>
-{chr(10).join(parts)}
-<rect width="{W}" height="{H}" filter="url(#grain)" fill="#000"/>
-<rect x="1" y="1" width="{W - 2}" height="{H - 2}" fill="none" stroke="#2a2a2a" stroke-width="2"/>
-</svg>"""
+    return svg(W, H, "\n".join(parts), seed=61)
 
 
 if __name__ == "__main__":
-    svg = render(fetch())
-    with open(OUT, "w", encoding="utf-8") as fh:
-        fh.write(svg)
-    print("stats.svg", len(svg) // 1024, "KB")
+    write("stats.svg", render(fetch()))
