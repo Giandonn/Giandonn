@@ -37,12 +37,7 @@ STATUS ........ ██████████ EM ATIVIDADE
 <img src="assets/h-registros.svg" alt="/ 03 — REGISTROS" width="100%">
 
 <p align="center">
-  <img height="165" src="https://github-readme-stats.vercel.app/api?username=Giandonn&show_icons=true&hide_border=true&bg_color=0a0a0a&title_color=f2f2f2&text_color=9a9a9a&icon_color=f2f2f2&ring_color=f2f2f2&custom_title=BOLETIM%20DE%20OCORR%C3%8ANCIAS" alt="Estatísticas">
-  <img height="165" src="https://github-readme-stats.vercel.app/api/top-langs/?username=Giandonn&layout=compact&hide_border=true&bg_color=0a0a0a&title_color=f2f2f2&text_color=9a9a9a&custom_title=LINGUAGENS%20EM%20USO" alt="Linguagens">
-</p>
-
-<p align="center">
-  <img width="100%" src="https://github-readme-activity-graph.vercel.app/graph?username=Giandonn&bg_color=0a0a0a&color=9a9a9a&line=f2f2f2&point=f2f2f2&area=true&area_color=3a3a3a&hide_border=true&custom_title=FREQU%C3%8ANCIA%20DE%20ATAQUE" alt="Gráfico de contribuições">
+  <img src="assets/stats.svg" alt="Commits, pull requests, repositórios, estrelas, linguagens e contribuições" width="100%">
 </p>
 
 <p align="center">
