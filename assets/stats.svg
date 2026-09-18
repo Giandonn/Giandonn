@@ -440,6 +440,7 @@
 <rect x="1218.2" y="559.2" width="18.8" height="18.8" fill="#161616"/>
 <rect x="1218.2" y="581.8" width="18.8" height="18.8" fill="#161616"/>
 <rect x="1218.2" y="604.4" width="18.8" height="18.8" fill="#161616"/>
+<rect x="1218.2" y="627" width="18.8" height="18.8" fill="#161616"/>
 <rect width="1280" height="706" filter="url(#grain)" fill="#000"/>
 <rect x="3" y="3" width="1274" height="700" fill="none" stroke="#d10f1f" stroke-width="6"/>
 </svg>
