@@ -111,9 +111,27 @@ def bullseye(cx, cy, r, rings=9, spin=None):
     return "".join(out)
 
 
-def skull(cx, cy, size, fill=BONE, outline=BLACK, stroke=0):
-    extra = f'stroke="{outline}" stroke-width="{_num(stroke * 512 / size)}" paint-order="stroke"' if stroke else ""
-    return place_icon("skull", cx, cy, size, fill, extra)
+def _logo_paths(part):
+    with open(os.path.join(HERE, "icons", "bls-logo.svg"), encoding="utf-8") as fh:
+        paths = re.findall(r'data-tone="(\w+)" data-part="(\w+)" d="([^"]+)"', fh.read())
+    paths = [(tone, d) for tone, p, d in paths if part == "all" or p == part]
+    nums = [float(v) for _, d in paths for v in re.findall(r"-?\d+(?:\.\d+)?", d)]
+    xs, ys = nums[0::2], nums[1::2]
+    return paths, (min(xs), min(ys), max(xs), max(ys))
+
+
+def bls_logo(cx, cy, size, fg=BONE, bg=BLACK, part="all"):
+    """Logo do Black Label Society centrado em (cx, cy), lado maior = size. part: all, skull ou letters."""
+    paths, (x0, y0, x1, y1) = _logo_paths(part)
+    s = size / max(x1 - x0, y1 - y0)
+    tx, ty = cx - (x0 + x1) / 2 * s, cy - (y0 + y1) / 2 * s
+    body = "".join(f'<path d="{d}" fill="{fg if tone == "fg" else bg}"/>' for tone, d in paths)
+    return f'<g transform="translate({_num(tx)} {_num(ty)}) scale({s:.4f})">{body}</g>'
+
+
+def skull(cx, cy, size, fg=BONE, bg=BLACK):
+    """A caveira do logo do BLS."""
+    return bls_logo(cx, cy, size, fg, bg, part="skull")
 
 
 def defs(seed=11, grain=0.10):
@@ -156,7 +174,9 @@ def section_head(num, label, x=40, y=40, width_=1200, icon_name="skull"):
         f'<path d="{text("goth", label, 64, lx, y + 52)}" fill="{BONE}" filter="url(#distress)"/>',
         rule(rail, y + 26, end - rail - (16 if icon_name else 0)),
     ]
-    if icon_name:
+    if icon_name == "skull":
+        out.append(skull(x + width_ - 30, y + 31, 56))
+    elif icon_name:
         out.append(place_icon(icon_name, x + width_ - 30, y + 31, 50, BONE))
     return "\n".join(out)
 

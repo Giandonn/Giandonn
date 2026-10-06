@@ -2,7 +2,7 @@
 Uso: python .github/stats/design.py"""
 import math
 
-from bls import (ASH, BLACK, BONE, INK, SILVER, STEEL, bullseye, place_icon, rule, section_head, skull, svg, text,
+from bls import (ASH, BLACK, BONE, INK, SILVER, STEEL, bls_logo, bullseye, place_icon, rule, section_head, skull, svg, text,
                  text_arc, width, write, _num)
 
 W = 1280
@@ -34,17 +34,16 @@ def patch(cx, cy, label, w=96, h=40):
             f'<path d="{text("caps", label, 15, cx, cy + 6, tracking=1.5, anchor="middle")}" fill="{BLACK}"/>')
 
 
-def colors(cx, cy, r, spin=None):
-    """Colete completo: rocker de cima, centro com o alvo do Zakk e a caveira, rocker de baixo."""
+def colors(cx, cy, r):
+    """Colete completo: rocker do clube em cima, logo do BLS no centro, rocker do capítulo embaixo."""
     ri, ro = r + 18, r + 82
     return f"""
 <circle cx="{cx}" cy="{cy}" r="{ro + 30}" fill="url(#spot)"/>
-{rocker(cx, cy, ri, ro, 56, "top", "Black Label", 50)}
-{rocker(cx, cy, ri, ro, 40, "bottom", "Society", 50)}
+{rocker(cx, cy, ri, ro, 50, "top", "Berzerkers", 50)}
+{rocker(cx, cy, ri, ro, 32, "bottom", "Brasil", 50)}
 <circle cx="{cx}" cy="{cy}" r="{r}" fill="{BLACK}" stroke="{BONE}" stroke-width="5"/>
 <circle cx="{cx}" cy="{cy}" r="{r - 9}" fill="none" stroke="{BONE}" stroke-width="1.3" stroke-dasharray="5 4"/>
-{bullseye(cx, cy, r - 17, rings=9, spin=spin)}
-{skull(cx, cy + 5, (r - 17) * 0.8, BONE, BLACK, stroke=r * 0.06)}
+{bls_logo(cx, cy, (r - 16) * 2 * 0.96)}
 """
 
 
@@ -57,7 +56,7 @@ def banner():
     left = 70
     body = f"""
 <g opacity="0.07">{bullseye(ex, ey, 620, rings=14)}</g>
-{colors(ex, ey, er, spin=9)}
+{colors(ex, ey, er)}
 {patch(ex - er - 78, ey + 4, "S.D.M.F.")}
 <path d="{text("caps", "DESENVOLVEDOR FULL STACK  ·  BERZERKER BRASIL", 16, left + 2, 104, tracking=2.6)}" fill="{SILVER}"/>
 {rule(left, 118, name_w - 6, SILVER)}
@@ -103,7 +102,7 @@ def sobre():
   <path d="{text_arc("caps", "STRENGTH · DETERMINATION", 13.5, cx, cy, r - 41, "top", tracking=1.6)}" fill="{BONE}"/>
   <path d="{text_arc("caps", "MERCILESS · FOREVER", 13.5, cx, cy, r - 21, "bottom", tracking=2.4)}" fill="{BONE}"/>
   <circle cx="{cx - r + 31}" cy="{cy + 6}" r="4" fill="{BONE}"/><circle cx="{cx + r - 31}" cy="{cy + 6}" r="4" fill="{BONE}"/>
-  {skull(cx, cy - 8, 62, BONE)}
+  {skull(cx, cy - 10, 84)}
   <path d="{text("caps", "S.D.M.F.", 17, cx, cy + 50, tracking=3, anchor="middle")}" fill="{BONE}"/>
 </g>""")
 
@@ -111,7 +110,7 @@ def sobre():
     parts.append(f'<rect x="0" y="{H - 84}" width="{W}" height="2" fill="{BONE}" opacity="0.6"/>')
     q = "ORDER OF THE BLACK   ·   IN ZAKK WE TRUST   ·   HAIL THE BERZERKERS"
     parts.append(f'<path d="{text("caps", q, 20, W / 2, H - 31, tracking=2.5, anchor="middle")}" fill="{BLACK}"/>')
-    parts.append(skull(64, H - 38, 32, BLACK) + skull(W - 64, H - 38, 32, BLACK))
+    parts.append(skull(64, H - 38, 40, BLACK, BONE) + skull(W - 64, H - 38, 40, BLACK, BONE))
     return svg(W, H, "\n".join(parts), seed=31)
 
 
@@ -149,8 +148,8 @@ def rodape():
              "ORDER OF THE BLACK · CATACOMBS OF THE BLACK VATICAN · GRIMMEST HITS · DOOM CREW INC.")
     body = f"""
 <g opacity="0.05">{bullseye(W / 2, H / 2, 700, rings=22)}</g>
-{skull(W / 2 - pw / 2 - 70, 88, 66, BONE)}
-{skull(W / 2 + pw / 2 + 70, 88, 66, BONE)}
+{skull(W / 2 - pw / 2 - 70, 88, 76)}
+{skull(W / 2 + pw / 2 + 70, 88, 76)}
 <path d="{text("goth", phrase, 92, W / 2, 122, anchor="middle")}" fill="{BONE}" filter="url(#distress)"/>
 <path d="{text("caps", "—  GIANDONN  ·  BERZERKER  ·  S.D.M.F.  ·  MMXXVI  —", 18, W / 2, 170, tracking=4, anchor="middle")}" fill="{SILVER}"/>
 {rule(60, 190, W - 120, STEEL)}

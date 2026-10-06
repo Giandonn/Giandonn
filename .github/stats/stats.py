@@ -85,7 +85,7 @@ def render(u):
             add(f'<rect x="{x}" y="{y}" width="5" height="{bh}" fill="{SILVER}"/>')
         add(f'<path d="{text("anton", val, 70, x + 22, y + 82)}" fill="{BLACK if hot else BONE}" filter="url(#distress)"/>')
         add(f'<path d="{text("caps", label, 13, x + 24, y + 108, tracking=2)}" fill="{BLACK if hot else SILVER}"/>')
-    add(skull(40 + bw * 2 - 22, top + 30, 30, BLACK))
+    add(skull(40 + bw * 2 - 24, top + 30, 36, BLACK, BONE))
 
     # Linguagens.
     lx, lw = 640, 600
