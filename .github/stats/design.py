@@ -1,47 +1,71 @@
 """Gera as peças fixas do perfil (banner, sobre, arsenal, rodapé).
 Uso: python .github/stats/design.py"""
+import math
+
 from bls import (ASH, BLACK, BONE, INK, SILVER, STEEL, bullseye, place_icon, rule, section_head, skull, svg, text,
                  text_arc, width, write, _num)
 
 W = 1280
 
 
-def emblem(cx, cy, r, top, bottom, spin=None):
-    """Patch de motoclube: anel com rockers em arco, alvo do Zakk no miolo e caveira por cima."""
-    band = r * 0.17
-    inner = r - band - 8
-    sep = r - band / 2 - 4
-    dots = "".join(f'<circle cx="{_num(cx + sx * sep * 0.985)}" cy="{_num(cy + 11)}" r="5" fill="{BONE}"/>' for sx in (-1, 1))
+def _arc_band(cx, cy, ri, ro, half, side):
+    """Faixa em arco entre os raios ri e ro, centrada no topo ou na base."""
+    c = -90 if side == "top" else 90
+    a1, a2 = math.radians(c - half), math.radians(c + half)
+
+    def p(r, a):
+        return f"{_num(cx + r * math.cos(a))},{_num(cy + r * math.sin(a))}"
+
+    return f"M{p(ro, a1)} A{_num(ro)},{_num(ro)} 0 0 1 {p(ro, a2)} L{p(ri, a2)} A{_num(ri)},{_num(ri)} 0 0 0 {p(ri, a1)} Z"
+
+
+def rocker(cx, cy, ri, ro, half, side, label, size):
+    """Rocker de colete de motoclube: faixa marfim, costura tracejada e letra gótica."""
+    base = ri + (ro - ri) * 0.24 if side == "top" else ro - (ro - ri) * 0.24
+    return (f'<path d="{_arc_band(cx, cy, ri, ro, half, side)}" fill="{BONE}" stroke="{BLACK}" stroke-width="3"/>'
+            f'<path d="{_arc_band(cx, cy, ri + 6, ro - 6, half - 1.6, side)}" fill="none" stroke="{BLACK}" stroke-width="1.4" stroke-dasharray="5 4"/>'
+            f'<path d="{text_arc("goth", label, size, cx, cy, base, side, tracking=1.5)}" fill="{BLACK}"/>')
+
+
+def patch(cx, cy, label, w=96, h=40):
+    """Patch retangular pequeno com borda bordada."""
+    return (f'<rect x="{_num(cx - w / 2)}" y="{_num(cy - h / 2)}" width="{w}" height="{h}" rx="4" fill="{BONE}" stroke="{BLACK}" stroke-width="3"/>'
+            f'<rect x="{_num(cx - w / 2 + 5)}" y="{_num(cy - h / 2 + 5)}" width="{w - 10}" height="{h - 10}" rx="2" fill="none" stroke="{BLACK}" stroke-width="1.2" stroke-dasharray="4 3"/>'
+            f'<path d="{text("caps", label, 15, cx, cy + 6, tracking=1.5, anchor="middle")}" fill="{BLACK}"/>')
+
+
+def colors(cx, cy, r, spin=None):
+    """Colete completo: rocker de cima, centro com o alvo do Zakk e a caveira, rocker de baixo."""
+    ri, ro = r + 18, r + 82
     return f"""
-<circle cx="{cx}" cy="{cy}" r="{r + 26}" fill="url(#spot)"/>
-<circle cx="{cx}" cy="{cy}" r="{r}" fill="{BLACK}" stroke="{BONE}" stroke-width="6"/>
-<circle cx="{cx}" cy="{cy}" r="{r - 11}" fill="none" stroke="{BONE}" stroke-width="1.5"/>
-<path d="{text_arc("caps", top, band * 0.62, cx, cy, inner + 13, "top", tracking=5)}" fill="{BONE}"/>
-<path d="{text_arc("caps", bottom, band * 0.55, cx, cy, r - 24, "bottom", tracking=6)}" fill="{BONE}"/>
-{dots}
-<circle cx="{cx}" cy="{cy}" r="{inner}" fill="none" stroke="{BONE}" stroke-width="2.5"/>
-{bullseye(cx, cy, inner - 9, rings=9, spin=spin)}
-{skull(cx, cy + 6, inner * 0.92, BONE, BLACK, stroke=inner * 0.07)}
+<circle cx="{cx}" cy="{cy}" r="{ro + 30}" fill="url(#spot)"/>
+{rocker(cx, cy, ri, ro, 56, "top", "Black Label", 50)}
+{rocker(cx, cy, ri, ro, 40, "bottom", "Society", 50)}
+<circle cx="{cx}" cy="{cy}" r="{r}" fill="{BLACK}" stroke="{BONE}" stroke-width="5"/>
+<circle cx="{cx}" cy="{cy}" r="{r - 9}" fill="none" stroke="{BONE}" stroke-width="1.3" stroke-dasharray="5 4"/>
+{bullseye(cx, cy, r - 17, rings=9, spin=spin)}
+{skull(cx, cy + 5, (r - 17) * 0.8, BONE, BLACK, stroke=r * 0.06)}
 """
 
 
 def banner():
     H = 560
-    ex, ey, er = 990, 282, 238
+    ex, ey, er = 985, 280, 140
     name_w = width("goth", "Giandonn", 176)
-    band_txt = "STACK LABEL SOCIETY"
-    band_w = width("caps", band_txt, 34, tracking=6)
+    band_txt = "DOOM CREW INC."
+    band_w = width("caps", band_txt, 34, tracking=7)
     left = 70
     body = f"""
 <g opacity="0.07">{bullseye(ex, ey, 620, rings=14)}</g>
-{emblem(ex, ey, er, "FULL STACK BERZERKER", "S.D.M.F.  ·  BRASIL", spin=9)}
-<path d="{text("caps", "DESENVOLVEDOR FULL STACK  ·  CAPÍTULO BRASIL", 16, left + 2, 104, tracking=3)}" fill="{SILVER}"/>
+{colors(ex, ey, er, spin=9)}
+{patch(ex - er - 78, ey + 4, "S.D.M.F.")}
+<path d="{text("caps", "DESENVOLVEDOR FULL STACK  ·  BERZERKER BRASIL", 16, left + 2, 104, tracking=2.6)}" fill="{SILVER}"/>
 {rule(left, 118, name_w - 6, SILVER)}
 <path d="{text("goth", "Giandonn", 176, left + 6, 288)}" fill="{STEEL}"/>
 <path d="{text("goth", "Giandonn", 176, left, 282)}" fill="{BONE}" filter="url(#distress)"/>
 <path d="M{left - 6},318 Q{_num(left + band_w / 2 + 20)},298 {_num(left + band_w + 46)},318 L{_num(left + band_w + 46)},372 Q{_num(left + band_w / 2 + 20)},352 {left - 6},372 Z" fill="{BONE}"/>
-<path d="{text("caps", band_txt, 34, left + 20, 357, tracking=6)}" fill="{BLACK}"/>
-<path d="{text("caps", "STRENGTH · DETERMINATION · MERGE · FOREVER", 17, left + 2, 420, tracking=3.2)}" fill="{BONE}"/>
+<path d="{text("caps", band_txt, 34, left + 20, 357, tracking=7)}" fill="{BLACK}"/>
+<path d="{text("caps", "STRENGTH · DETERMINATION · MERCILESS · FOREVER", 16, left + 2, 420, tracking=2.6)}" fill="{BONE}"/>
 <path d="{text("caps", "PHP  /  LARAVEL  /  JAVA  /  REACT  /  VUE  /  TS", 14, left + 2, 498, tracking=2)}" fill="{ASH}"/>
 <rect x="{left}" y="452" width="56" height="2" fill="{SILVER}"/>
 <path d="{text("caps", "MMXXVI", 24, 0, 0, tracking=10)}" fill="{SILVER}" transform="translate(1242 40) rotate(90)"/>
@@ -53,11 +77,11 @@ def sobre():
     H = 470
     rows = [
         ("NOME", "GIANDONN"),
-        ("FUNÇÃO", "DESENVOLVEDOR FULL STACK"),
+        ("OFÍCIO", "DESENVOLVEDOR FULL STACK"),
+        ("PATENTE", "BERZERKER"),
         ("CAPÍTULO", "BRASIL"),
-        ("EM CAMPO", "APIs, painéis e apps"),
-        ("JURAMENTO", "código legível é código livre"),
-        ("STATUS", "NA ESTRADA"),
+        ("CREW", "DOOM CREW INC."),
+        ("STATUS", "ON THE ROAD"),
     ]
     parts = [section_head("I", "Sobre", icon_name="skull")]
     for i, (k, v) in enumerate(rows):
@@ -71,20 +95,21 @@ def sobre():
             vx += 28
         parts.append(f'<path d="{text("caps", v, 19, vx, y, tracking=1.5)}" fill="{BONE}"/>')
 
-    cx, cy, r = 1015, 236, 128
-    parts.append(f"""<g transform="rotate(-8 {cx} {cy})" filter="url(#distress)" opacity="0.93">
+    cx, cy, r = 1010, 232, 134
+    parts.append(f"""<g transform="rotate(-7 {cx} {cy})" filter="url(#distress)" opacity="0.94">
   <circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{BONE}" stroke-width="6"/>
-  <circle cx="{cx}" cy="{cy}" r="{r - 12}" fill="none" stroke="{BONE}" stroke-width="1.5"/>
-  <circle cx="{cx}" cy="{cy}" r="{r - 48}" fill="none" stroke="{BONE}" stroke-width="2"/>
-  <path d="{text_arc("caps", "MEMBRO VITALÍCIO", 17, cx, cy, r - 41, "top", tracking=2.5)}" fill="{BONE}"/>
-  <path d="{text_arc("caps", "S.D.M.F.", 18, cx, cy, r - 19, "bottom", tracking=8)}" fill="{BONE}"/>
-  <circle cx="{cx - r + 30}" cy="{cy + 12}" r="3.5" fill="{BONE}"/><circle cx="{cx + r - 30}" cy="{cy + 12}" r="3.5" fill="{BONE}"/>
-  {skull(cx, cy + 2, 92, BONE)}
+  <circle cx="{cx}" cy="{cy}" r="{r - 11}" fill="none" stroke="{BONE}" stroke-width="1.3" stroke-dasharray="5 4"/>
+  <circle cx="{cx}" cy="{cy}" r="{r - 50}" fill="none" stroke="{BONE}" stroke-width="2"/>
+  <path d="{text_arc("caps", "STRENGTH · DETERMINATION", 13.5, cx, cy, r - 41, "top", tracking=1.6)}" fill="{BONE}"/>
+  <path d="{text_arc("caps", "MERCILESS · FOREVER", 13.5, cx, cy, r - 21, "bottom", tracking=2.4)}" fill="{BONE}"/>
+  <circle cx="{cx - r + 31}" cy="{cy + 6}" r="4" fill="{BONE}"/><circle cx="{cx + r - 31}" cy="{cy + 6}" r="4" fill="{BONE}"/>
+  {skull(cx, cy - 8, 62, BONE)}
+  <path d="{text("caps", "S.D.M.F.", 17, cx, cy + 50, tracking=3, anchor="middle")}" fill="{BONE}"/>
 </g>""")
 
     parts.append(f'<rect x="0" y="{H - 76}" width="{W}" height="76" fill="{BONE}"/>')
     parts.append(f'<rect x="0" y="{H - 84}" width="{W}" height="2" fill="{BONE}" opacity="0.6"/>')
-    q = "SEM FRAMEWORK MÁGICO   ·   SEM DEPLOY NA SEXTA   ·   SEM MEDO DO LEGADO"
+    q = "ORDER OF THE BLACK   ·   IN ZAKK WE TRUST   ·   HAIL THE BERZERKERS"
     parts.append(f'<path d="{text("caps", q, 20, W / 2, H - 31, tracking=2.5, anchor="middle")}" fill="{BLACK}"/>')
     parts.append(skull(64, H - 38, 32, BLACK) + skull(W - 64, H - 38, 32, BLACK))
     return svg(W, H, "\n".join(parts), seed=31)
@@ -93,7 +118,7 @@ def sobre():
 def arsenal():
     items = [("php", "PHP"), ("laravel", "LARAVEL"), ("java", "JAVA"), ("typescript", "TYPESCRIPT"),
              ("react", "REACT"), ("vuedotjs", "VUE"), ("mysql", "MYSQL"), ("supabase", "SUPABASE"),
-             ("docker", "DOCKER"), ("python", "PYTHON"), ("git", "GIT"), (None, "E O QUE VIER")]
+             ("docker", "DOCKER"), ("python", "PYTHON"), ("git", "GIT"), (None, "FIRE IT UP")]
     cols, gap, tw_, th = 6, 16, (1200 - 5 * 16) / 6, 170
     H = 40 + 64 + 34 + 2 * th + gap + 44
     parts = [section_head("II", "Arsenal", icon_name="guitar")]
@@ -117,15 +142,19 @@ def arsenal():
 
 
 def rodape():
-    H = 230
-    phrase = "Stronger Than Tech Debt"
-    pw = width("goth", phrase, 88)
+    H = 250
+    phrase = "Stronger Than Death"
+    pw = width("goth", phrase, 92)
+    disco = ("SONIC BREW · STRONGER THAN DEATH · 1919 ETERNAL · THE BLESSED HELLRIDE · MAFIA · SHOT TO HELL · "
+             "ORDER OF THE BLACK · CATACOMBS OF THE BLACK VATICAN · GRIMMEST HITS · DOOM CREW INC.")
     body = f"""
 <g opacity="0.05">{bullseye(W / 2, H / 2, 700, rings=22)}</g>
-{skull(W / 2 - pw / 2 - 70, 92, 66, BONE)}
-{skull(W / 2 + pw / 2 + 70, 92, 66, BONE)}
-<path d="{text("goth", phrase, 88, W / 2, 124, anchor="middle")}" fill="{BONE}" filter="url(#distress)"/>
-<path d="{text("caps", "—  GIANDONN  ·  S.D.M.F.  ·  MMXXVI  —", 18, W / 2, 180, tracking=4, anchor="middle")}" fill="{SILVER}"/>
+{skull(W / 2 - pw / 2 - 70, 88, 66, BONE)}
+{skull(W / 2 + pw / 2 + 70, 88, 66, BONE)}
+<path d="{text("goth", phrase, 92, W / 2, 122, anchor="middle")}" fill="{BONE}" filter="url(#distress)"/>
+<path d="{text("caps", "—  GIANDONN  ·  BERZERKER  ·  S.D.M.F.  ·  MMXXVI  —", 18, W / 2, 170, tracking=4, anchor="middle")}" fill="{SILVER}"/>
+{rule(60, 190, W - 120, STEEL)}
+<path d="{text("caps", disco, 11 * min(1, (W - 140) / width("caps", disco, 11, tracking=1.6)), W / 2, 222, tracking=1.2, anchor="middle")}" fill="{ASH}"/>
 """
     return svg(W, H, body, seed=51, grain=0.1)
 

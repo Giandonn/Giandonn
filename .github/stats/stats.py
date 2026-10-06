@@ -104,7 +104,7 @@ def render(u):
     weeks = cal["weeks"][-53:]
     gy = 500
     add(rule(40, gy - 52, 1200, STEEL))
-    add(f'<path d="{text("goth", "Dias na Estrada", 36, 40, gy - 6)}" fill="{BONE}"/>')
+    add(f'<path d="{text("goth", "The Blessed Hellride", 36, 40, gy - 6)}" fill="{BONE}"/>')
     add(f'<path d="{text("caps", f"{fmt(cal['totalContributions'])} CONTRIBUIÇÕES NOS ÚLTIMOS 12 MESES", 13, 1240, gy - 10, tracking=2, anchor="end")}" fill="{SILVER}"/>')
     peak = max((d["contributionCount"] for w in weeks for d in w["contributionDays"]), default=0) or 1
     ramp = [INK, "#3a3733", "#6d6860", "#aaa396", BONE]

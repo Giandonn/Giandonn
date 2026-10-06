@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="Giandonn — Stack Label Society. Strength, Determination, Merge, Forever. Desenvolvedor full stack, capítulo Brasil." width="100%">
+  <img src="assets/banner.svg" alt="Giandonn — Black Label Society, Doom Crew Inc. Strength, Determination, Merciless, Forever. Desenvolvedor full stack, Berzerker Brasil." width="100%">
 </p>
 
 <p align="center">
-  <img src="assets/sobre.svg" alt="I Sobre — Giandonn, desenvolvedor full stack, Brasil. Sem framework mágico. Sem deploy na sexta. Sem medo do legado." width="100%">
+  <img src="assets/sobre.svg" alt="I Sobre — Giandonn, desenvolvedor full stack, Berzerker, capítulo Brasil, Doom Crew Inc. Order of the Black. In Zakk we trust. Hail the Berzerkers." width="100%">
 </p>
 
 <p align="center">
@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/footer.svg" alt="Stronger Than Tech Debt." width="100%">
+  <img src="assets/footer.svg" alt="Stronger Than Death — discografia do Black Label Society." width="100%">
 </p>
 
 <p align="center"><sub>ícones: <a href="https://fontawesome.com/license/free">Font Awesome</a> (CC BY 4.0) · <a href="https://simpleicons.org">Simple Icons</a> (CC0) · fontes: UnifrakturCook, Cinzel, Anton (OFL)</sub></p>
