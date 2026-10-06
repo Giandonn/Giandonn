@@ -5,7 +5,7 @@ import os
 import urllib.request
 from collections import Counter
 
-from ratm import BLACK, CREAM, GREY, INK, RED, RED_DARK, _num, section_head, star, svg, text, write
+from bls import ASH, BLACK, BONE, INK, SILVER, STEEL, _num, rule, section_head, skull, svg, text, write
 
 LOGIN = "Giandonn"
 
@@ -71,49 +71,43 @@ def render(u):
         (fmt(sum(r["stargazerCount"] for r in repos["nodes"])), "ESTRELAS"),
     ]
 
-    parts = [section_head("03", "REGISTROS")]
+    parts = [section_head("III", "Registros", icon_name=None)]
     add = parts.append
 
-    # Placar: 4 blocos, o primeiro em vermelho.
+    # Placar: 4 blocos, o primeiro em marfim.
     bw, bh, top = 136, 124, 144
     for i, (val, label) in enumerate(numbers):
         x = 40 + (i % 2) * (bw * 2 + 20)
         y = top + (i // 2) * (bh + 16)
         hot = i == 0
-        add(f'<rect x="{x}" y="{y}" width="{bw * 2 + 4}" height="{bh}" fill="{RED if hot else INK}"/>')
+        add(f'<rect x="{x}" y="{y}" width="{bw * 2 + 4}" height="{bh}" fill="{BONE if hot else INK}" stroke="{BONE if hot else STEEL}" stroke-width="1.5"/>')
         if not hot:
-            add(f'<rect x="{x}" y="{y}" width="6" height="{bh}" fill="{RED}"/>')
-        vd, _ = text("anton", val, 70, x + 22, y + 82)
-        ld, _ = text("type", label, 14, x + 24, y + 108, tracking=1.5)
-        add(f'<path d="{vd}" fill="{BLACK if hot else CREAM}" filter="url(#distress)"/>')
-        add(f'<path d="{ld}" fill="{BLACK if hot else GREY}"/>')
-    add(f'<path d="{star(40 + bw * 2 - 22, top + 30, 16)}" fill="{BLACK}"/>')
+            add(f'<rect x="{x}" y="{y}" width="5" height="{bh}" fill="{SILVER}"/>')
+        add(f'<path d="{text("anton", val, 70, x + 22, y + 82)}" fill="{BLACK if hot else BONE}" filter="url(#distress)"/>')
+        add(f'<path d="{text("caps", label, 13, x + 24, y + 108, tracking=2)}" fill="{BLACK if hot else SILVER}"/>')
+    add(skull(40 + bw * 2 - 22, top + 30, 30, BLACK))
 
     # Linguagens.
     lx, lw = 640, 600
-    hd, _ = text("type", "LINGUAGENS EM USO", 16, lx, top + 12, tracking=2)
-    add(f'<path d="{hd}" fill="{GREY}"/>')
+    add(f'<path d="{text("caps", "LINGUAGENS EM USO", 15, lx, top + 12, tracking=3)}" fill="{SILVER}"/>')
+    shades = [BONE, "#c9c2b2", SILVER, "#7b766d", ASH, "#4a4741"]
     for i, (name, size) in enumerate(langs.most_common(6)):
         y = top + 50 + i * 44
         pct = size / total_size
-        nd, _ = text("anton", name.upper(), 22, lx, y, tracking=2)
-        pd, _ = text("anton", f"{pct * 100:.1f}%", 22, lx + lw, y, anchor="end")
-        add(f'<path d="{nd}" fill="{CREAM}"/>')
-        add(f'<path d="{pd}" fill="{RED if i == 0 else GREY}"/>')
+        add(f'<path d="{text("caps", name.upper(), 19, lx, y, tracking=2)}" fill="{BONE}"/>')
+        add(f'<path d="{text("anton", f"{pct * 100:.1f}%", 22, lx + lw, y, anchor="end")}" fill="{BONE if i == 0 else SILVER}"/>')
         add(f'<rect x="{lx}" y="{y + 7}" width="{lw}" height="9" fill="{INK}"/>')
-        add(f'<rect x="{lx}" y="{y + 7}" width="{_num(max(lw * pct, 4))}" height="9" fill="{RED if i == 0 else "#9b1420" if i < 3 else RED_DARK}"/>')
+        add(f'<rect x="{lx}" y="{y + 7}" width="{_num(max(lw * pct, 4))}" height="9" fill="{shades[i]}"/>')
 
     # Calendário de contribuições.
     cal = cc["contributionCalendar"]
     weeks = cal["weeks"][-53:]
     gy = 500
-    add(f'<rect x="40" y="{gy - 42}" width="1200" height="2" fill="{RED_DARK}"/>')
-    td, _ = text("anton", "FREQUÊNCIA DE ATAQUE", 26, 40, gy - 8, tracking=3)
-    cd, _ = text("type", f"{fmt(cal['totalContributions'])} CONTRIBUIÇÕES NOS ÚLTIMOS 12 MESES", 14, 1240, gy - 10, tracking=1.5, anchor="end")
-    add(f'<path d="{td}" fill="{CREAM}"/>')
-    add(f'<path d="{cd}" fill="{GREY}"/>')
+    add(rule(40, gy - 52, 1200, STEEL))
+    add(f'<path d="{text("goth", "Dias na Estrada", 36, 40, gy - 6)}" fill="{BONE}"/>')
+    add(f'<path d="{text("caps", f"{fmt(cal['totalContributions'])} CONTRIBUIÇÕES NOS ÚLTIMOS 12 MESES", 13, 1240, gy - 10, tracking=2, anchor="end")}" fill="{SILVER}"/>')
     peak = max((d["contributionCount"] for w in weeks for d in w["contributionDays"]), default=0) or 1
-    ramp = [INK, "#4a0a10", "#7d0d18", RED, "#ff4a4a"]
+    ramp = [INK, "#3a3733", "#6d6860", "#aaa396", BONE]
     cell, gap = 18.8, 3.8
     ox = 40 + (1200 - (len(weeks) * (cell + gap) - gap)) / 2
     for wi, w in enumerate(weeks):
