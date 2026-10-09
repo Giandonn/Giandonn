@@ -434,6 +434,7 @@
 <rect x="1218.2" y="559.2" width="18.8" height="18.8" fill="#3a3733"/>
 <rect x="1218.2" y="581.8" width="18.8" height="18.8" fill="#3a3733"/>
 <rect x="1218.2" y="604.4" width="18.8" height="18.8" fill="#3a3733"/>
+<rect x="1218.2" y="627" width="18.8" height="18.8" fill="#131313"/>
 <rect width="1280" height="706" filter="url(#grain)" fill="#000"/>
 <rect x="4" y="4" width="1272" height="698" fill="none" stroke="#2c2a27" stroke-width="8"/><rect x="14" y="14" width="1252" height="678" fill="none" stroke="#ece5d3" stroke-width="1.2" opacity="0.55"/>
 </svg>
